@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { MongoClient } from "mongodb"
+const { MongoClient } = require("mongodb");
 
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/Sahithi"
 

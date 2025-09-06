@@ -37,41 +37,52 @@ export default function SignupForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      {error && <p className="text-sm text-red-600">{error}</p>}
+    <form
+      onSubmit={onSubmit}
+      className="mx-auto max-w-md bg-white p-6 rounded-lg shadow-md space-y-4"
+    >
+      <h2 className="text-2xl font-semibold text-gray-900 text-center">Create Account</h2>
+      {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+
       <div className="grid gap-2">
-        <label className="text-sm">Name</label>
+        <label className="text-sm font-medium text-gray-700">Name</label>
         <input
-          className="h-10 rounded border px-3"
+          className="h-12 rounded border px-3 focus:ring-2 focus:ring-red-600 focus:outline-none"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
+          placeholder="John Doe"
           required
         />
       </div>
+
       <div className="grid gap-2">
-        <label className="text-sm">Email</label>
+        <label className="text-sm font-medium text-gray-700">Email</label>
         <input
-          className="h-10 rounded border px-3"
+          className="h-12 rounded border px-3 focus:ring-2 focus:ring-red-600 focus:outline-none"
           type="email"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
+          placeholder="you@example.com"
           required
         />
       </div>
+
       <div className="grid gap-2">
-        <label className="text-sm">Password</label>
+        <label className="text-sm font-medium text-gray-700">Password</label>
         <input
-          className="h-10 rounded border px-3"
+          className="h-12 rounded border px-3 focus:ring-2 focus:ring-red-600 focus:outline-none"
           type="password"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
+          placeholder="Enter a strong password"
           required
         />
       </div>
+
       <div className="grid gap-2">
-        <label className="text-sm">Role</label>
+        <label className="text-sm font-medium text-gray-700">Role</label>
         <select
-          className="h-10 rounded border px-3"
+          className="h-12 rounded border px-3 focus:ring-2 focus:ring-red-600 focus:outline-none"
           value={form.role}
           onChange={(e) => setForm({ ...form, role: e.target.value })}
         >
@@ -79,36 +90,42 @@ export default function SignupForm() {
           <option value="recipient">Recipient</option>
         </select>
       </div>
+
       <div className="grid gap-2">
-        <label className="text-sm">Blood Group (Donors)</label>
+        <label className="text-sm font-medium text-gray-700">Blood Group (Donors)</label>
         <input
-          className="h-10 rounded border px-3"
+          className="h-12 rounded border px-3 focus:ring-2 focus:ring-red-600 focus:outline-none"
           value={form.bloodGroup}
           onChange={(e) => setForm({ ...form, bloodGroup: e.target.value })}
           placeholder="e.g., O+, A-"
         />
       </div>
+
       <div className="grid gap-2">
-        <label className="text-sm">Pincode</label>
+        <label className="text-sm font-medium text-gray-700">Pincode</label>
         <input
-          className="h-10 rounded border px-3"
+          className="h-12 rounded border px-3 focus:ring-2 focus:ring-red-600 focus:outline-none"
           value={form.pincode}
           onChange={(e) => setForm({ ...form, pincode: e.target.value })}
+          placeholder="123456"
           required
         />
       </div>
+
       <div className="grid gap-2">
-        <label className="text-sm">Mobile</label>
+        <label className="text-sm font-medium text-gray-700">Mobile</label>
         <input
-          className="h-10 rounded border px-3"
+          className="h-12 rounded border px-3 focus:ring-2 focus:ring-red-600 focus:outline-none"
           value={form.mobile}
           onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+          placeholder="+91 9876543210"
           required
         />
       </div>
+
       <button
         disabled={loading}
-        className="w-full rounded bg-red-600 px-3 py-2 text-white hover:bg-red-700 disabled:opacity-60"
+        className="w-full h-12 rounded bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-60 transition"
       >
         {loading ? "Creating account..." : "Create Account"}
       </button>

@@ -30,23 +30,29 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      {error && <p className="text-sm text-red-600">{error}</p>}
+    <form
+      onSubmit={onSubmit}
+      className="mx-auto max-w-md bg-white p-6 rounded-lg shadow-md space-y-4"
+    >
+      <h2 className="text-2xl font-semibold text-gray-900 text-center">Sign In</h2>
+      {error && <p className="text-sm text-red-600 text-center">{error}</p>}
       <div className="grid gap-2">
-        <label className="text-sm">Email</label>
+        <label className="text-sm font-medium text-gray-700">Email</label>
         <input
-          className="h-10 rounded border px-3"
+          className="h-12 rounded border px-3 focus:ring-2 focus:ring-red-600 focus:outline-none"
           type="email"
+          placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
       </div>
       <div className="grid gap-2">
-        <label className="text-sm">Password</label>
+        <label className="text-sm font-medium text-gray-700">Password</label>
         <input
-          className="h-10 rounded border px-3"
+          className="h-12 rounded border px-3 focus:ring-2 focus:ring-red-600 focus:outline-none"
           type="password"
+          placeholder="Enter your password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -54,7 +60,7 @@ export default function LoginForm() {
       </div>
       <button
         disabled={loading}
-        className="w-full rounded bg-red-600 px-3 py-2 text-white hover:bg-red-700 disabled:opacity-60"
+        className="w-full h-12 rounded bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-60 transition"
       >
         {loading ? "Signing in..." : "Sign In"}
       </button>

@@ -1,6 +1,5 @@
 "use client"
 import Navbar from "@/components/navbar"
-import type React from "react"
 import Footer from "@/components/footer"
 import useSWR from "swr"
 import { useEffect, useMemo, useState } from "react"
@@ -21,25 +20,13 @@ function parseJwtSub(token?: string): string | null {
   }
 }
 
-function formatRemaining(to?: string | Date) {
-  if (!to) return "—"
-  const end = new Date(to).getTime()
-  const now = Date.now()
-  let diff = Math.max(0, end - now)
-  const days = Math.floor(diff / (24 * 60 * 60 * 1000))
-  diff -= days * 24 * 60 * 60 * 1000
-  const hours = Math.floor(diff / (60 * 60 * 1000))
-  diff -= hours * 60 * 60 * 1000
-  const mins = Math.floor(diff / (60 * 1000))
-  return `${days}d ${hours}h ${mins}m`
-}
-
 export default function CampaignsPage() {
   const { data, mutate } = useSWR("/api/campaigns", fetcher, { refreshInterval: 15000 })
   const list = useMemo(() => data?.campaigns || [], [data])
 
   const [auth, setAuth] = useState<AuthState | null>(null)
   const [creatorSub, setCreatorSub] = useState<string | null>(null)
+
   useEffect(() => {
     const raw = localStorage.getItem("auth")
     if (raw) {
@@ -71,8 +58,7 @@ export default function CampaignsPage() {
       setForm({ title: "", date: "", location: "", points: 10, imageUrl: "", durationDays: 7 })
       mutate()
     } else {
-      const d = await res.json().catch(() => ({}))
-      alert(d.error ? JSON.stringify(d.error) : "Failed to create")
+      alert("Failed to create")
     }
   }
 
@@ -93,29 +79,10 @@ export default function CampaignsPage() {
   async function deleteCampaign(id: string) {
     if (!auth?.token) return alert("Please login")
     if (!confirm("Delete this campaign?")) return
-    const res = await fetch(`/api/campaigns/${id}`, {
+    await fetch(`/api/campaigns/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${auth.token}` },
     })
-    if (!res.ok) {
-      const d = await res.json().catch(() => ({}))
-      return alert(d.error || "Delete failed")
-    }
-    mutate()
-  }
-
-  async function saveEdit(id: string, payload: any) {
-    if (!auth?.token) return alert("Please login")
-    const res = await fetch(`/api/campaigns/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-      body: JSON.stringify(payload),
-    })
-    if (!res.ok) {
-      const d = await res.json().catch(() => ({}))
-      return alert(d.error || "Update failed")
-    }
-    setEditId(null)
     mutate()
   }
 
@@ -123,180 +90,146 @@ export default function CampaignsPage() {
     <main>
       <Navbar />
       <section className="mx-auto max-w-6xl px-4 py-10">
-        <h1 className="mb-4 text-3xl font-semibold text-gray-900 text-balance">Campaigns</h1>
+        <h1 className="mb-6 text-4xl font-bold text-gray-900">Campaigns</h1>
 
-        <form onSubmit={createCampaign} className="mb-8 grid gap-3 md:grid-cols-6">
-          <input
-            className="h-10 rounded border px-3 md:col-span-2"
-            placeholder="Campaign title"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            required
-          />
-          <input
-            className="h-10 rounded border px-3 md:col-span-2"
-            type="datetime-local"
-            placeholder="Start date & time"
-            value={form.date}
-            onChange={(e) => setForm({ ...form, date: e.target.value })}
-            required
-          />
-          <input
-            className="h-10 rounded border px-3 md:col-span-2"
-            placeholder="Location"
-            value={form.location}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
-            required
-          />
-          <input
-            className="h-10 rounded border px-3 md:col-span-2"
-            type="number"
-            min={0}
-            max={1000}
-            placeholder="Reward points"
-            value={form.points}
-            onChange={(e) => setForm({ ...form, points: Number(e.target.value) })}
-          />
-          <input
-            className="h-10 rounded border px-3 md:col-span-2"
-            placeholder="Image URL (optional)"
-            value={form.imageUrl}
-            onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-          />
-          <input
-            className="h-10 rounded border px-3 md:col-span-1"
-            type="number"
-            min={1}
-            max={365}
-            placeholder="Duration (days)"
-            value={form.durationDays}
-            onChange={(e) => setForm({ ...form, durationDays: Number(e.target.value) })}
-          />
-          <button className="h-10 rounded bg-red-600 px-4 text-white hover:bg-red-700 md:col-span-1">Create</button>
-        </form>
+        {/* Create Campaign Form */}
+        <div className="mb-10 rounded-xl border bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-800">Create a Campaign</h2>
+          <form onSubmit={createCampaign} className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Campaign Title</label>
+              <input
+                className="mt-1 w-full rounded border px-3 py-2"
+                placeholder="e.g., Blood Drive at City Hospital"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                required
+              />
+            </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {list.length === 0 && <p className="text-gray-600 text-sm">No campaigns yet.</p>}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Start Date & Time</label>
+              <input
+                type="datetime-local"
+                className="mt-1 w-full rounded border px-3 py-2"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Location</label>
+              <input
+                className="mt-1 w-full rounded border px-3 py-2"
+                placeholder="e.g., Hyderabad Red Cross Center"
+                value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Reward Points</label>
+              <input
+                type="number"
+                min={0}
+                className="mt-1 w-full rounded border px-3 py-2"
+                value={form.points}
+                onChange={(e) => setForm({ ...form, points: Number(e.target.value) })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Campaign Banner (Image URL)</label>
+              <input
+                className="mt-1 w-full rounded border px-3 py-2"
+                placeholder="https://example.com/banner.jpg"
+                value={form.imageUrl}
+                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Duration (days)</label>
+              <input
+                type="number"
+                min={1}
+                max={365}
+                className="mt-1 w-full rounded border px-3 py-2"
+                value={form.durationDays}
+                onChange={(e) => setForm({ ...form, durationDays: Number(e.target.value) })}
+              />
+            </div>
+
+            <div className="md:col-span-2 flex justify-end">
+              <button className="rounded bg-red-600 px-5 py-2 text-white hover:bg-red-700">
+                Create Campaign
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Campaign List */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {list.length === 0 && (
+            <div className="col-span-2 rounded-lg border bg-gray-50 p-10 text-center text-gray-600">
+              No campaigns yet. Be the first to create one!
+            </div>
+          )}
+
           {list.map((c: any) => {
             const isOwner = creatorSub && c.creatorId === creatorSub
             return (
-              <div key={c.id} className="overflow-hidden rounded-lg border bg-white shadow-sm">
-                {c.imageUrl ? (
-                  <img
-                    src={c.imageUrl || "/placeholder.svg?height=160&width=600&query=campaign image"}
-                    alt={c.title}
-                    className="h-40 w-full object-cover"
-                  />
-                ) : (
-                  <img
-                    src={"/placeholder.svg?height=160&width=600&query=campaign image placeholder"}
-                    alt=""
-                    className="h-40 w-full object-cover"
-                  />
-                )}
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-3">
+              <div
+                key={c.id}
+                className="overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md"
+              >
+                <img
+                  src={c.imageUrl || "/placeholder.svg?height=200&width=400&text=Campaign"}
+                  alt={c.title}
+                  className="h-48 w-full object-cover"
+                />
+                <div className="p-5">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-medium text-gray-900">{c.title}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">{c.title}</h3>
                       <p className="text-sm text-gray-600">
                         {new Date(c.date).toLocaleString()} • {c.location}
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm text-emerald-600 font-medium">{c.points} pts</span>
+                      <span className="text-sm font-semibold text-emerald-600">{c.points} pts</span>
                       <div className="text-xs text-gray-500">
                         Ends in: <Countdown iso={c.endsAt} />
                       </div>
                     </div>
                   </div>
 
-                  {editId === c.id && isOwner ? (
-                    <div className="mt-3 grid gap-2 md:grid-cols-2">
-                      <input
-                        className="h-9 rounded border px-2"
-                        defaultValue={c.title}
-                        onChange={(e) => (c.title = e.target.value)}
-                      />
-                      <input
-                        className="h-9 rounded border px-2"
-                        type="datetime-local"
-                        defaultValue={c.date?.slice(0, 16)}
-                        onChange={(e) => (c.date = e.target.value)}
-                      />
-                      <input
-                        className="h-9 rounded border px-2"
-                        defaultValue={c.location}
-                        onChange={(e) => (c.location = e.target.value)}
-                      />
-                      <input
-                        className="h-9 rounded border px-2"
-                        type="number"
-                        min={0}
-                        max={1000}
-                        defaultValue={c.points}
-                        onChange={(e) => (c.points = Number(e.target.value))}
-                      />
-                      <input
-                        className="h-9 rounded border px-2 md:col-span-2"
-                        placeholder="Image URL"
-                        defaultValue={c.imageUrl || ""}
-                        onChange={(e) => (c.imageUrl = e.target.value)}
-                      />
-                      <input
-                        className="h-9 rounded border px-2"
-                        type="number"
-                        min={1}
-                        max={365}
-                        placeholder="Duration (days)"
-                        onChange={(e) => (c.durationDays = Number(e.target.value))}
-                      />
-                      <div className="flex gap-2 md:col-span-2">
-                        <button className="rounded bg-gray-200 px-3 py-1 text-sm" onClick={() => setEditId(null)}>
-                          Cancel
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      className="rounded bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700"
+                      onClick={() => joinCampaign(c.id)}
+                    >
+                      Join
+                    </button>
+                    {isOwner && (
+                      <>
+                        <button
+                          className="rounded bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
+                          onClick={() => setEditId(c.id)}
+                        >
+                          Edit
                         </button>
                         <button
-                          className="rounded bg-emerald-600 px-3 py-1 text-sm text-white"
-                          onClick={() =>
-                            saveEdit(c.id, {
-                              title: c.title,
-                              date: c.date,
-                              location: c.location,
-                              points: c.points,
-                              imageUrl: c.imageUrl,
-                              durationDays: c.durationDays,
-                            })
-                          }
+                          className="rounded bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
+                          onClick={() => deleteCampaign(c.id)}
                         >
-                          Save
+                          Delete
                         </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="mt-3 flex items-center gap-2">
-                      <button
-                        className="rounded bg-red-600 px-3 py-1.5 text-white hover:bg-red-700"
-                        onClick={() => joinCampaign(c.id)}
-                      >
-                        Join
-                      </button>
-                      {isOwner && (
-                        <>
-                          <button
-                            className="rounded bg-gray-200 px-3 py-1.5 text-gray-800"
-                            onClick={() => setEditId(c.id)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="rounded bg-gray-200 px-3 py-1.5 text-gray-800"
-                            onClick={() => deleteCampaign(c.id)}
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  )}
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             )

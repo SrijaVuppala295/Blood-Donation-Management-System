@@ -18,7 +18,6 @@ export default function FindDonorsPage() {
     const params = new URLSearchParams()
     if (bloodGroup) params.set("bloodGroup", bloodGroup)
     if (pincode) params.set("pincode", pincode)
-    // If no filters, force all=true to guarantee full list from API
     if (!bloodGroup && !pincode) params.set("all", "true")
     const qs = params.toString()
     return `/api/users/search${qs ? `?${qs}` : ""}`
@@ -26,32 +25,37 @@ export default function FindDonorsPage() {
 
   const { data } = useSWR(
     auth?.token ? url : null,
-    (u: string) => fetch(u, { headers: { Authorization: `Bearer ${auth?.token || ""}` } }).then((r) => r.json()),
-    { keepPreviousData: true, refreshInterval: 15000 },
+    (u: string) =>
+      fetch(u, { headers: { Authorization: `Bearer ${auth?.token || ""}` } }).then((r) => r.json()),
+    { keepPreviousData: true, refreshInterval: 15000 }
   )
   const donors = useMemo(() => data?.donors || [], [data])
 
   return (
-    <main>
+    <main className="bg-gray-50 min-h-screen">
       <Navbar />
       <section className="mx-auto max-w-5xl px-4 py-10">
-        <h1 className="mb-1 text-3xl font-semibold text-gray-900">Find Donors</h1>
-        <p className="mb-4 text-sm text-gray-600">All donors are shown by default. Use filters to narrow results.</p>
-        <div className="mb-4 flex flex-col gap-3 md:flex-row">
+        <h1 className="mb-3 text-3xl font-bold text-gray-900">Find Donors</h1>
+        <p className="mb-6 text-sm text-gray-600">
+          All donors are shown by default. Use filters to narrow your search.
+        </p>
+
+        {/* Filters */}
+        <div className="mb-8 flex flex-col md:flex-row gap-3">
           <input
-            className="h-10 rounded border px-3"
+            className="h-12 flex-1 rounded border px-3 focus:outline-none focus:ring-2 focus:ring-red-600"
             placeholder="Blood Group (e.g., O+)"
             value={bloodGroup}
             onChange={(e) => setBloodGroup(e.target.value)}
           />
           <input
-            className="h-10 rounded border px-3"
+            className="h-12 flex-1 rounded border px-3 focus:outline-none focus:ring-2 focus:ring-red-600"
             placeholder="Pincode"
             value={pincode}
             onChange={(e) => setPincode(e.target.value)}
           />
           <button
-            className="h-10 rounded bg-gray-200 px-3 text-sm"
+            className="h-12 rounded bg-gray-200 px-4 text-sm font-medium hover:bg-gray-300 transition"
             onClick={() => {
               setBloodGroup("")
               setPincode("")
@@ -60,16 +64,23 @@ export default function FindDonorsPage() {
             Clear
           </button>
         </div>
-        <div className="grid gap-4">
+
+        {/* Donor Cards */}
+        <div className="grid gap-5 md:grid-cols-2">
           {donors.length === 0 && <p className="text-sm text-gray-600">No donors found.</p>}
           {donors.map((d: any) => (
-            <div key={d.id} className="rounded border bg-white p-4">
-              <h3 className="font-medium text-gray-900">{d.name}</h3>
-              <p className="text-sm text-gray-600">
-                {d.bloodGroup} • {d.pincode}
+            <div
+              key={d.id}
+              className="rounded-lg bg-white p-5 shadow-sm hover:shadow-lg transition"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{d.name}</h3>
+              <p className="text-sm text-gray-600 mb-1">
+                Blood Group: <span className="font-medium">{d.bloodGroup}</span> • Pincode:{" "}
+                <span className="font-medium">{d.pincode}</span>
               </p>
               <p className="text-sm text-gray-600">
-                Email: {d.email} • Mobile: {d.mobile}
+                Email: <span className="font-medium">{d.email}</span> • Mobile:{" "}
+                <span className="font-medium">{d.mobile}</span>
               </p>
             </div>
           ))}
