@@ -48,3 +48,11 @@ export type Notification = {
   read: boolean
   createdAt: Date
 }
+
+export type Contact = {
+  _id?: any
+  name: string
+  email: string
+  message: string
+  createdAt: Date
+}
