@@ -34,7 +34,12 @@ export default function SignupForm() {
         throw new Error("Unexpected response from server. Please try again later.")
       }
 
-      if (!res.ok) throw new Error(data.error || "Signup failed")
+      if (!res.ok) {
+        const errorMessage = typeof data.error === "object"
+          ? Object.values(data.error.fieldErrors).flat().join(", ")
+          : data.error || "Signup failed"
+        throw new Error(errorMessage)
+      }
       localStorage.setItem("auth", JSON.stringify({ token: data.token, user: data.user }))
       window.location.href = data.user.role === "donor" ? "/donor" : "/recipient/requests"
     } catch (err: any) {
