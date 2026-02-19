@@ -11,19 +11,24 @@ const schema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const parsed = schema.safeParse(body)
-  if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 400 })
+  try {
+    const body = await req.json()
+    const parsed = schema.safeParse(body)
+    if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 400 })
 
-  const { email, password } = parsed.data
-  const db = await getDb()
-  const users = db.collection<User>("users")
-  const user = await users.findOne({ email })
-  if (!user) return Response.json({ error: "Invalid credentials" }, { status: 401 })
+    const { email, password } = parsed.data
+    const db = await getDb()
+    const users = db.collection<User>("users")
+    const user = await users.findOne({ email })
+    if (!user) return Response.json({ error: "Invalid credentials" }, { status: 401 })
 
-  const ok = await comparePassword(password, user.passwordHash)
-  if (!ok) return Response.json({ error: "Invalid credentials" }, { status: 401 })
+    const ok = await comparePassword(password, user.passwordHash)
+    if (!ok) return Response.json({ error: "Invalid credentials" }, { status: 401 })
 
-  const token = signToken({ sub: String(user._id), email, role: user.role })
-  return Response.json({ token, user: { id: String(user._id), name: user.name, email, role: user.role } })
+    const token = signToken({ sub: String(user._id), email, role: user.role })
+    return Response.json({ token, user: { id: String(user._id), name: user.name, email, role: user.role } })
+  } catch (error: any) {
+    console.error("Login error:", error)
+    return Response.json({ error: "Internal Server Error" }, { status: 500 })
+  }
 }

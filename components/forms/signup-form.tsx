@@ -25,7 +25,15 @@ export default function SignupForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       })
-      const data = await res.json()
+
+      let data
+      const contentType = res.headers.get("content-type")
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json()
+      } else {
+        throw new Error("Unexpected response from server. Please try again later.")
+      }
+
       if (!res.ok) throw new Error(data.error || "Signup failed")
       localStorage.setItem("auth", JSON.stringify({ token: data.token, user: data.user }))
       window.location.href = data.user.role === "donor" ? "/donor" : "/recipient/requests"
