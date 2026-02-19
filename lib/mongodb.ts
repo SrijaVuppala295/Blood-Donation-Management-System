@@ -1,7 +1,6 @@
 import { MongoClient } from "mongodb"
 
-const uri = process.env.MONGODB_URI || "mongodb+srv://srijavuppala295_db_user:uzKCkXLgmTIvPED2@cluster0.kviv0p4.mongodb.net/BloodConnect?retryWrites=true&w=majority"
-
+const uri = process.env.MONGODB_URI 
 if (!uri) {
   throw new Error('Please add your Mongo URI to .env.local')
 }
